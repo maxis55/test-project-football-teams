@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\League;
 use Illuminate\Foundation\Application;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 class FootballController extends Controller
 {
-    public function index(){
-
+    public function index()
+    {
+        $leagues = League::all()->toArray();
 
 
         return Inertia::render('Welcome', [
@@ -18,6 +19,7 @@ class FootballController extends Controller
             'canRegister' => Route::has('register'),
             'laravelVersion' => Application::VERSION,
             'phpVersion' => PHP_VERSION,
+            'leagues' => $leagues,
         ]);
     }
 }

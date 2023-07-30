@@ -22,5 +22,9 @@ class FootballMatch extends Model
         return $this->belongsTo(League::class, 'league_id', 'id');
     }
 
+    public function matchToTeams()
+    {
+        return $this->hasMany(FootballMatchToTeam::class, 'match_id', 'id');
+    }
 
 }
