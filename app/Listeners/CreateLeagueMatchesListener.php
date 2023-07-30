@@ -34,8 +34,14 @@ class CreateLeagueMatchesListener
                 }
                 $match = $league->matches()->create();
                 $match->matchToTeams()->create(['team_id' => $team->getKey(), 'is_team_stadium_owner' => true]);
-                $match->matchToTeams()->create(['team_id' => $opponentTeam->getKey(), 'is_team_stadium_owner' => false]);
+                $match->matchToTeams()->create([
+                    'team_id' => $opponentTeam->getKey(),
+                    'is_team_stadium_owner' => false
+                ]);
             }
+
+            $league->teamResultsInALeague()
+                ->create(['team_id' => $team->getKey()]);
         }
     }
 }

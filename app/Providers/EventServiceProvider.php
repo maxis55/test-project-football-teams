@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Events\LeagueCreated;
 use App\Listeners\CreateLeagueMatchesListener;
+use App\Listeners\MatchFinishedSubscriber;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -23,6 +24,8 @@ class EventServiceProvider extends ServiceProvider
             CreateLeagueMatchesListener::class
         ],
     ];
+
+    protected $subscribe = [MatchFinishedSubscriber::class];
 
     /**
      * Register any events for your application.

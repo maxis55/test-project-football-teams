@@ -32,4 +32,44 @@ class League extends Model
     {
         return $this->hasMany(FootballMatch::class, 'league_id', 'id');
     }
+
+
+    public function teams()
+    {
+        return $this->hasManyThrough(
+            FootballTeam::class,
+            FootballLeagueToTeam::class,
+            'league_id',
+            'id',
+            'id',
+            'team_id'
+        );
+    }
+
+    public function matchesToTeams()
+    {
+        return $this->hasManyThrough(
+            FootballMatchToTeam::class,
+            FootballMatch::class,
+            'league_id',
+            'id',
+            'id',
+            'team_id'
+        );
+    }
+
+    public function teamResultsInALeague()
+    {
+        return $this->hasMany(FootballLeagueToTeam::class, 'league_id', 'id');
+    }
+
+    public function scopeWithTeamResults($q)
+    {
+        //could replace with an annoying join to avoid nesting (not finished example)
+//        ->join((new FootballTeam())->getTable(), (new FootballLeagueToTeam())->getTable().'.team_id',
+//        (new FootballTeam())->getTable().'.id')
+        //but lazy
+
+        return $q->with('teamResultsInALeague.team');
+    }
 }
