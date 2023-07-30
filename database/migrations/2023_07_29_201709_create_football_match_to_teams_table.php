@@ -21,7 +21,7 @@ return new class extends Migration
 
             $table->foreign('team_id')
                 ->references('id')
-                ->on('teams')
+                ->on('football_teams')
                 ->onUpdate('NO ACTION')
                 ->onDelete('cascade');
 
