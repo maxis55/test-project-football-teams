@@ -82,7 +82,7 @@ class FootballTeam extends Model
         FootballLeagueToTeam::where('team_id', $this->getKey())
             ->where('league_id', $leagueId)
             ->update([
-                'points' => $goals * 3,
+                'points' => $goals * FootballMatch::POINTS_PER_GOAL,
                 'matches_played' => $matchesPlayed,
                 'wins' => $wins,
                 'loses' => $loses,

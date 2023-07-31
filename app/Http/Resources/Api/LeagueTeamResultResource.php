@@ -5,7 +5,7 @@ namespace App\Http\Resources\Api;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class LeagueTeamResult extends JsonResource
+class LeagueTeamResultResource extends JsonResource
 {
     /**
      * Transform the resource into an array.

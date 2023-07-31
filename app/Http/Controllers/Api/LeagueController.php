@@ -6,14 +6,20 @@ use App\Events\MatchIsFinished;
 use App\Events\PlayedAllMatchesInALeague;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\LeagueResource;
-use App\Http\Resources\Api\LeagueTeamResult;
-use App\Http\Resources\MatchWithResultsResource;
+use App\Http\Resources\Api\LeagueTeamResultResource;
+use App\Http\Resources\Api\MatchWithResultsResource;
 use App\Models\FootballMatch;
 use App\Models\League;
+use App\Repositories\LeagueRepositoryInterface;
 use Illuminate\Http\Request;
 
 class LeagueController extends Controller
 {
+
+    public function __construct(protected LeagueRepositoryInterface $repository)
+    {
+    }
+
     public function index()
     {
         return LeagueResource::collection(League::all());
@@ -35,15 +41,18 @@ class LeagueController extends Controller
         return new LeagueResource($league);
     }
 
-    public function getResults($league)
+    public function getLeagueStandingAndPredictions(League $league)
     {
         /**
-         * @var League $leagueModel
+         * @var
          */
-        $leagueModel = League::where('id', $league)
-            ->withTeamResults()->firstOrFail();
+        $league
+            ->load('teamResultsInALeague.team');
 
-        return LeagueTeamResult::collection($leagueModel->teamResultsInALeague);
+        return [
+            'standings' => LeagueTeamResultResource::collection($league->teamResultsInALeague),
+            'predictions' => $this->repository->calculateTheOddsOfWinningForTheTeams($league),
+        ];
     }
 
     public function getAllMatchResults(League $league)
@@ -63,7 +72,8 @@ class LeagueController extends Controller
         /**
          * @var FootballMatch $nextMatch
          */
-        $nextMatch = $league->matches()->where('finished', false)
+        $nextMatch = $league->matches()
+            ->where('finished', false)
             ->with('matchToTeams.team')
             ->firstOrFail();
         $nextMatch->runTheMatch();

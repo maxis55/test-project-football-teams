@@ -23,10 +23,11 @@ const fetchLMatchResults = () => {
             console.log(error);
         });
 }
-const fetchLeagueResults = () => {
-    axios.get(route('api.leagues.get-results', props.league.id))
+const fetchLeagueStanding = () => {
+    axios.get(route('api.leagues.get-league-standing-and-predictions', props.league.id))
         .then(({data}) => {
-            leagueResults.value = data.data;
+            leagueResults.value = data.standings;
+            leagueTeamsPredictions.value=data.predictions;
         })
         .catch((error) => {
             console.log(error);
@@ -35,7 +36,7 @@ const fetchLeagueResults = () => {
 const runNextWeek = () => {
     axios.post(route('api.leagues.run-next-week', props.league.id))
         .then(({data}) => {
-            fetchLeagueResults();
+            fetchLeagueStanding();
             matchResults.value.push(data.data);
         })
         .catch((error) => {
@@ -51,7 +52,7 @@ const runNextWeek = () => {
 const playAll = () => {
     axios.post(route('api.leagues.play-all', props.league.id))
         .then(({data}) => {
-            fetchLeagueResults();
+            fetchLeagueStanding();
             fetchLMatchResults();
         })
         .catch((error) => {
@@ -97,7 +98,7 @@ const submitChangeMatchResults = () => {
             //could also just replace the match that we just updated here with a new one
             //but how about no
 
-            fetchLeagueResults();
+            fetchLeagueStanding();
             closeModal();
         })
         .catch((error) => {
@@ -114,7 +115,7 @@ const closeModal = () => {
 }
 
 onBeforeMount(() => {
-    fetchLeagueResults();
+    fetchLeagueStanding();
     fetchLMatchResults();
 })
 
@@ -228,10 +229,10 @@ onBeforeMount(() => {
                                 v-for="leagueTeamPrediction in leagueTeamsPredictions">
                                 <th scope="row"
                                     class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                    {{ leagueTeamPrediction.team.name }}
+                                    {{ leagueTeamPrediction.name }}
                                 </th>
                                 <td class="px-6 py-4">
-                                    {{ leagueTeamPrediction.prediction }}
+                                    {{ leagueTeamPrediction.odds }}%
                                 </td>
                             </tr>
 

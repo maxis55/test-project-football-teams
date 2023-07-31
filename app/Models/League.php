@@ -5,10 +5,13 @@ namespace App\Models;
 use App\Events\LeagueCreated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 /**
  * @property int $id
  * @property string $name
+ *
+ * @property Collection|FootballLeagueToTeam[] $teamResultsInALeague
  */
 class League extends Model
 {
@@ -61,15 +64,5 @@ class League extends Model
     public function teamResultsInALeague()
     {
         return $this->hasMany(FootballLeagueToTeam::class, 'league_id', 'id');
-    }
-
-    public function scopeWithTeamResults($q)
-    {
-        //could replace with an annoying join to avoid nesting (not finished example)
-//        ->join((new FootballTeam())->getTable(), (new FootballLeagueToTeam())->getTable().'.team_id',
-//        (new FootballTeam())->getTable().'.id')
-        //but lazy
-
-        return $q->with('teamResultsInALeague.team');
     }
 }

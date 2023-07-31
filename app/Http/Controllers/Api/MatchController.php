@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Events\MatchResultsHaveChanged;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\UpdateMatchResultsRequest;
-use App\Http\Resources\MatchWithResultsResource;
+use App\Http\Resources\Api\MatchWithResultsResource;
 use App\Models\FootballMatch;
 
 class MatchController extends Controller

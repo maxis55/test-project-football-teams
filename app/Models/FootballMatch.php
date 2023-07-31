@@ -17,6 +17,11 @@ class FootballMatch extends Model
 {
     use HasFactory;
 
+    public const THEOR_MAX_GOALS_PER_MATCH = 6;
+    public const THEOR_AVG_GOALS_PER_MATCH = 3;
+
+    public const POINTS_PER_GOAL = 3;
+
     protected $fillable = ['finished', 'name'];
 
     /**
@@ -56,19 +61,21 @@ class FootballMatch extends Model
         //then it means over 50% chance of a game having 3 goals
         //for simplicity having more or less is 25%
         //then we can break it down further
-        $goals = 3; //default avg
+
+        $goals = self::THEOR_AVG_GOALS_PER_MATCH; //default avg, i.e. 3 atm
         $firstTeamScoresGoals = 0;
         $secondTeamScoresGoals = 0;
         $rand = rand(0, 100);
         if ($rand < 25) {
             //less than 3
-            $goals = rand(0, 2);
+            $goals = rand(0, self::THEOR_AVG_GOALS_PER_MATCH - 1);
         }
         if ($rand > 75) {
             if ($rand > 90) {
-                $goals = 6;
+                $goals = self::THEOR_MAX_GOALS_PER_MATCH;
             } else {
-                $goals = rand(4, 5);
+                //4, 5
+                $goals = rand(self::THEOR_AVG_GOALS_PER_MATCH + 1, self::THEOR_MAX_GOALS_PER_MATCH - 1);
             }
         }
         //bigger than 0
