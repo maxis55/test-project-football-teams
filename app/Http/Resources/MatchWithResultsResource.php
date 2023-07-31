@@ -21,7 +21,7 @@ class MatchWithResultsResource extends JsonResource
     {
         return [
             'id' => $this->resource->getKey(),
-            'name' => 'Week'.($this->resource->getKey() + 1),
+            'name' => $this->resource->name,
 
             'home_team' => $this->formatMatchToTeam(
                 $this->resource->matchToTeams

@@ -52,6 +52,7 @@ const playAll = () => {
     axios.post(route('api.leagues.play-all', props.league.id))
         .then(({data}) => {
             fetchLeagueResults();
+            fetchLMatchResults();
         })
         .catch((error) => {
             console.log(error);

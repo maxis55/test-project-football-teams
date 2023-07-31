@@ -8,6 +8,7 @@ use Illuminate\Support\Collection;
 
 /**
  * @property int $league_id
+ * @property string $name
  * @property boolean $finished
  *
  * @property Collection|FootballMatchToTeam $matchToTeams
@@ -16,7 +17,7 @@ class FootballMatch extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['finished'];
+    protected $fillable = ['finished', 'name'];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
