@@ -26,10 +26,17 @@ Route::name('api.')->group(function () {
         [LeagueController::class, 'getResults'])
         ->name('leagues.get-results');
 
+    Route::get('leagues/{league}/get-all-match-results',
+        [LeagueController::class, 'getAllMatchResults'])
+        ->name('leagues.get-all-match-results');
+
     Route::post('leagues/{league}/run-next-week', [LeagueController::class, 'runNextWeek'])
         ->name('leagues.run-next-week');
     Route::post('leagues/{league}/play-all', [LeagueController::class, 'playAll'])
         ->name('leagues.play-all');
+
+    Route::patch('matches/{match}/update-results', [\App\Http\Controllers\Api\MatchController::class, 'updateResults'])
+        ->name('matches.update-results');
 });
 
 

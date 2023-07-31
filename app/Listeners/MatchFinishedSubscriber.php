@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\MatchIsFinished;
+use App\Events\MatchResultsHaveChanged;
 use App\Events\PlayedAllMatchesInALeague;
 use App\Models\FootballTeam;
 use Illuminate\Events\Dispatcher;
@@ -10,7 +11,11 @@ use Illuminate\Events\Dispatcher;
 class MatchFinishedSubscriber
 {
 
-    public function handleMatchFinished(MatchIsFinished $event): void
+    /**
+     * @param MatchIsFinished|MatchResultsHaveChanged $event
+     * @return void
+     */
+    public function handleMatchResultsChanged($event): void
     {
         /**
          * @var FootballTeam $team
@@ -35,7 +40,12 @@ class MatchFinishedSubscriber
     {
         $events->listen(
             MatchIsFinished::class,
-            [MatchFinishedSubscriber::class, 'handleMatchFinished']
+            [MatchFinishedSubscriber::class, 'handleMatchResultsChanged']
+        );
+
+        $events->listen(
+            MatchResultsHaveChanged::class,
+            [MatchFinishedSubscriber::class, 'handleMatchResultsChanged']
         );
 
         $events->listen(

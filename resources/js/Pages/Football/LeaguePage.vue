@@ -2,6 +2,7 @@
 import {Head} from '@inertiajs/vue3';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import {onBeforeMount, ref} from "vue";
+import Modal from "@/Components/Modal.vue";
 
 const props = defineProps({
     league: {
@@ -11,6 +12,17 @@ const props = defineProps({
 
 const leagueResults = ref([]);
 const leagueTeamsPredictions = ref([]);
+const matchResults = ref([]);
+const showModal = ref(false);
+const fetchLMatchResults = () => {
+    axios.get(route('api.leagues.get-all-match-results', props.league.id))
+        .then(({data}) => {
+            matchResults.value = data.data;
+        })
+        .catch((error) => {
+            console.log(error);
+        });
+}
 const fetchLeagueResults = () => {
     axios.get(route('api.leagues.get-results', props.league.id))
         .then(({data}) => {
@@ -24,6 +36,7 @@ const runNextWeek = () => {
     axios.post(route('api.leagues.run-next-week', props.league.id))
         .then(({data}) => {
             fetchLeagueResults();
+            matchResults.value.push(data.data);
         })
         .catch((error) => {
             if (error.response.status === 404) {
@@ -45,8 +58,63 @@ const playAll = () => {
         });
 }
 
+const getInitialMatchFormData = () => ({
+    'match_id': null,
+    'home_team_id': null,
+    'home_team_goals': null,
+    'guest_team_id': null,
+    'guest_team_goals': null
+});
+const getInitialMatchFormInfo = () => ({
+    'home_team_name': null,
+    'guest_team_name': null
+});
+
+const matchForm = ref(getInitialMatchFormData());
+
+const matchFormInfo = ref(getInitialMatchFormInfo())
+
+const openModalForMatch = (matchResult) => {
+    matchFormInfo.value.home_team_name = matchResult.home_team.name;
+    matchFormInfo.value.guest_team_name = matchResult.guest_team.name;
+
+    matchForm.value.match_id = matchResult.id;
+
+    matchForm.value.home_team_goals = matchResult.home_team.goals;
+    matchForm.value.home_team_id = matchResult.home_team.id;
+
+    matchForm.value.guest_team_goals = matchResult.guest_team.goals;
+    matchForm.value.guest_team_id = matchResult.guest_team.id;
+
+
+    showModal.value = true;
+}
+const submitChangeMatchResults = () => {
+    axios.patch(route('api.matches.update-results', matchForm.value.match_id), matchForm.value)
+        .then(({data}) => {
+            fetchLMatchResults();
+            //could also just replace the match that we just updated here with a new one
+            //but how about no
+
+            fetchLeagueResults();
+            closeModal();
+        })
+        .catch((error) => {
+            console.log(error);
+            closeModal();
+        });
+}
+
+const closeModal = () => {
+    Object.assign(matchForm.value, getInitialMatchFormData());
+    Object.assign(matchFormInfo.value, getInitialMatchFormInfo());
+    showModal.value = false;
+
+}
+
 onBeforeMount(() => {
     fetchLeagueResults();
+    fetchLMatchResults();
 })
 
 
@@ -180,52 +248,41 @@ onBeforeMount(() => {
                                 class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th scope="col" class="px-6 py-3">
-                                    Team name
+                                    Match
                                 </th>
-                                <th scope="col" class="px-6 py-3" title="Points">
-                                    PTS
+                                <th scope="col" class="px-6 py-3" title="Home team">
+                                    Home team
                                 </th>
-                                <th scope="col" class="px-6 py-3" title="Matches played">
-                                    P
+                                <th scope="col" class="px-6 py-3" title="Score">
+                                    Score
                                 </th>
-                                <th scope="col" class="px-6 py-3" title="Wins">
-                                    W
+                                <th scope="col" class="px-6 py-3" title="Guest team">
+                                    Guest team
                                 </th>
-                                <th scope="col" class="px-6 py-3" title="Draws">
-                                    D
-                                </th>
-                                <th scope="col" class="px-6 py-3" title="Loses">
-                                    L
-                                </th>
-                                <th scope="col" class="px-6 py-3" title="Goal difference">
-                                    GD
+                                <th scope="col" class="px-6 py-3" title="Action">
+                                    Action
                                 </th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
-                                v-for="leagueTeamResult in leagueResults">
+                                v-for="matchResult in matchResults">
                                 <th scope="row"
                                     class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                    {{ leagueTeamResult.team.name }}
+                                    {{ matchResult.name }}
                                 </th>
                                 <td class="px-6 py-4">
-                                    {{ leagueTeamResult.points }}
+                                    {{ matchResult.home_team.name }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    {{ leagueTeamResult.matches_played }}
+                                    {{ matchResult.home_team.goals }}-{{ matchResult.guest_team.goals }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    {{ leagueTeamResult.wins }}
+                                    {{ matchResult.guest_team.name }}
                                 </td>
                                 <td class="px-6 py-4">
-                                    {{ leagueTeamResult.draws }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    {{ leagueTeamResult.loses }}
-                                </td>
-                                <td class="px-6 py-4">
-                                    {{ leagueTeamResult.goal_difference }}
+                                    <a @click.prevent="openModalForMatch(matchResult)" href="#"
+                                       class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
                                 </td>
                             </tr>
 
@@ -236,6 +293,40 @@ onBeforeMount(() => {
             </div>
 
         </div>
+        <Modal :show="showModal">
+            <div class="grid grid-cols-1 p-5 bg-white dark:bg-gray-900 antialiased ">
+                <form @submit.prevent="submitChangeMatchResults">
+                    <div class="mb-6">
+                        <label for="base-input"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{
+                                matchFormInfo.home_team_name
+                            }}</label>
+                        <input v-model="matchForm.home_team_goals" type="number" min="0"
+                               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    </div>
+                    <div class="mb-6">
+                        <label for="base-input"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">{{
+                                matchFormInfo.guest_team_name
+                            }}</label>
+                        <input v-model="matchForm.guest_team_goals" type="number" min="0"
+                               class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                    </div>
+
+                    <div class="md:col-span-5 flex justify-between">
+                        <button type="submit"
+                                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                            Submit
+                        </button>
+                        <button
+                            @click="closeModal"
+                            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-gray-600 dark:hover:bg-red-700 dark:focus:ring-red-800">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </Modal>
     </div>
 </template>
 

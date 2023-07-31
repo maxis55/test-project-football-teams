@@ -7,6 +7,7 @@ use App\Events\PlayedAllMatchesInALeague;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\LeagueResource;
 use App\Http\Resources\Api\LeagueTeamResult;
+use App\Http\Resources\MatchWithResultsResource;
 use App\Models\FootballMatch;
 use App\Models\League;
 use Illuminate\Http\Request;
@@ -30,6 +31,7 @@ class LeagueController extends Controller
             $name = 'League'.((League::query()->max('id') ?? 0) + 1);
         }
         $league = League::create(['name' => $name]);
+
         return new LeagueResource($league);
     }
 
@@ -40,7 +42,20 @@ class LeagueController extends Controller
          */
         $leagueModel = League::where('id', $league)
             ->withTeamResults()->firstOrFail();
+
         return LeagueTeamResult::collection($leagueModel->teamResultsInALeague);
+    }
+
+    public function getAllMatchResults(League $league)
+    {
+        $league->load([
+            'matches' => function ($q) {
+                $q->where('finished', true);
+                $q->with('matchToTeams.team');
+            }
+        ]);
+
+        return MatchWithResultsResource::collection($league->matches);
     }
 
     public function runNextWeek(League $league)
@@ -48,12 +63,14 @@ class LeagueController extends Controller
         /**
          * @var FootballMatch $nextMatch
          */
-        $nextMatch = $league->matches()->where('finished', false)->firstOrFail();
+        $nextMatch = $league->matches()->where('finished', false)
+            ->with('matchToTeams.team')
+            ->firstOrFail();
         $nextMatch->runTheMatch();
 
         MatchIsFinished::dispatch($nextMatch);
 
-        return ['success' => true];
+        return new MatchWithResultsResource($nextMatch);
     }
 
     public function playAll(League $league)
