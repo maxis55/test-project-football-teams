@@ -9,6 +9,7 @@ use App\Http\Resources\Api\LeagueResource;
 use App\Http\Resources\Api\LeagueTeamResultResource;
 use App\Http\Resources\Api\MatchWithResultsResource;
 use App\Models\FootballMatch;
+use App\Models\FootballTeam;
 use App\Models\League;
 use App\Repositories\LeagueRepositoryInterface;
 use Illuminate\Http\Request;
@@ -48,6 +49,9 @@ class LeagueController extends Controller
          */
         $league
             ->load('teamResultsInALeague.team');
+        foreach (FootballTeam::all() as $team){
+            $team->refreshTeamScoreInALeague($league->getKey());
+        }
 
         return [
             'standings' => LeagueTeamResultResource::collection($league->teamResultsInALeague),

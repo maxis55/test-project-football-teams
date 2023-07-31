@@ -19,6 +19,7 @@ class FootballMatch extends Model
 
     public const THEOR_MAX_GOALS_PER_MATCH = 6;
     public const THEOR_AVG_GOALS_PER_MATCH = 3;
+    public const THEOR_AVG_GOALS_PER_MATCH_PER_TEAM = 1;
 
     public const POINTS_PER_GOAL = 3;
 
@@ -60,7 +61,7 @@ class FootballMatch extends Model
         //lets say, 3 goals per match is the average per match
         //then it means over 50% chance of a game having 3 goals
         //for simplicity having more or less is 25%
-        //then we can break it down further
+        //then we can break it down further and split between teams
 
         $goals = self::THEOR_AVG_GOALS_PER_MATCH; //default avg, i.e. 3 atm
         $firstTeamScoresGoals = 0;
