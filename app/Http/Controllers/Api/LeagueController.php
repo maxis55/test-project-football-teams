@@ -49,9 +49,6 @@ class LeagueController extends Controller
          */
         $league
             ->load('teamResultsInALeague.team');
-        foreach (FootballTeam::all() as $team){
-            $team->refreshTeamScoreInALeague($league->getKey());
-        }
 
         return [
             'standings' => LeagueTeamResultResource::collection($league->teamResultsInALeague),
