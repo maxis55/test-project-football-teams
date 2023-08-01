@@ -9,10 +9,10 @@ use App\Http\Resources\Api\LeagueResource;
 use App\Http\Resources\Api\LeagueTeamResultResource;
 use App\Http\Resources\Api\MatchWithResultsResource;
 use App\Models\FootballMatch;
-use App\Models\FootballTeam;
 use App\Models\League;
 use App\Repositories\LeagueRepositoryInterface;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class LeagueController extends Controller
 {
@@ -50,10 +50,10 @@ class LeagueController extends Controller
         $league
             ->load('teamResultsInALeague.team');
 
-        return [
+        return new JsonResource([
             'standings' => LeagueTeamResultResource::collection($league->teamResultsInALeague),
             'predictions' => $this->repository->calculateTheOddsOfWinningForTheTeams($league),
-        ];
+        ]);
     }
 
     public function getAllMatchResults(League $league)
@@ -84,7 +84,7 @@ class LeagueController extends Controller
         return new MatchWithResultsResource($nextMatch);
     }
 
-    public function playAll(League $league)
+    public function playAllRemainingMatches(League $league)
     {
         $matches = $league->matches()->where('finished', false)->get();
         foreach ($matches as $match) {

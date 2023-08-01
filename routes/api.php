@@ -32,8 +32,8 @@ Route::name('api.')->group(function () {
 
     Route::post('leagues/{league}/run-next-week', [LeagueController::class, 'runNextWeek'])
         ->name('leagues.run-next-week');
-    Route::post('leagues/{league}/play-all', [LeagueController::class, 'playAll'])
-        ->name('leagues.play-all');
+    Route::post('leagues/{league}/play-all-remaining-matches', [LeagueController::class, 'playAllRemainingMatches'])
+        ->name('leagues.play-all-remaining-matches');
 
     Route::patch('matches/{match}/update-results', [\App\Http\Controllers\Api\MatchController::class, 'updateResults'])
         ->name('matches.update-results');
