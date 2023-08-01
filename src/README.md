@@ -1,3 +1,4 @@
+## LARAVEL SAIL SET UP
 ## Prerequisites
 
 To set up the project you need to have docker installed on your system, refer to the documentation for further details depending on the OS
