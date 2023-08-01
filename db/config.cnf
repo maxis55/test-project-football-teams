@@ -1,0 +1,6 @@
+[mysqld]
+character_set_server=utf8
+collation_server=utf8_general_ci
+max_allowed_packet=32M
+default_authentication_plugin=mysql_native_password
+max_execution_time=60000
